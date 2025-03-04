@@ -1,0 +1,8 @@
+# Conda environment folder (optional if you store env inside project)
+env/
+# Byte-compiled / compiled files
+__pycache__/
+*.pyc
+# macOS / Windows metadata
+.DS_Store
+Thumbs.db
