@@ -1,0 +1,221 @@
+﻿[Placeholder]: CPL+ BTO - Tech Handover  - 2025/02/06 10:55 CET – Transcript
+Attendees
+Jason Li, Jason Li's Presentation, Joel Juarez, Joel Juarez's Presentation, Kavya Swamy, Marcus Mansson, Mihail Peter, Umer Iftikhar
+Transcript
+Joel Juarez: from our sites only Jason and me because Aneka had a conflicting meeting So if we are complete I think we can just start.
+Marcus Mansson: We're complete. Yep.
+Joel Juarez: Then let me copy the myboard link here and I will share it anyways so you can see the screen or just follow me here.
+Joel Juarez: All right then let's just start and jump into the topic. So yeah I think just to give an overview of the board we have here two flows but they are kind of similar.  one we try to reflect what it is happening in mobility site and the other one it's what's happening on new listing site because we have a two entry points for all the new leasing leads handling there so yeah I will say that I try to put kind of the flow of the process or how the user journey combined
+Joel Juarez: with some part of architecting or the overview of the architecture. So which repositories are involved there and where you will need to make changes to get things done. So the first thing that I want to show is the flow that we already know. This is the configurator, right?  this multi-step flow that the users can actually select all the configuration of the car like the color some tires thing then some in interior configuration here there is no one but yeah some interior configuration and some extras then you will get to this the summary page of your configuration and basically this all flow it's
+Joel Juarez: the single page application and this flow is all the code base it's in the repository bay they call configurator web app this repository is not something that it's deployed somewhere it's just creating a react component package a library that will be used in two different web application that are actually serving these pages so this is the first thing that  We can remark here that this vehicle configurator web app it's the codebase but it's just the component. So we don't have deployed this application anywhere.
+Joel Juarez: then as you already know we work on the feature that it's related to redirect the user instead of going to the checkout in the new listing site we will go to the classic contact form plus the configuration.  That's why it's called cost per lead plus right because we have the classic lead but with the extra configurations there. So basically for enable this when you load this very first page you have to put in the When you are in this page you can just put this extra URL parameter and then internally in the code we will handle the redirection.
+Joel Juarez: So if this flag is present then we will go to the contact form. if it's true…
+Joel Juarez: if it's false or it's not present we will go to the checkout. So right now the status quo is this one because we are behind this feature flag. Let's say it's not turned off.
+Marcus Mansson: So it's turned off.
+Marcus Mansson: This query parameter is
+Joel Juarez: The thing is that we are using just for internal testing…
+Marcus Mansson: Mhm.
+Joel Juarez: because no one knows that the users don't know that they have to append this parameter. So no one is appending from the BIP for example that is coming here in the previous page. so one is appending this we are doing manually just for testing purposes. So the status quo is the current behavior that it's going to the checkout. Why?
+Joel Juarez: We haven't live with these changes or fully live on production.
+00:05:00
+Jason Li: feature flat is because we don't have any working listing on staging. So we have to test it on production. So we decide to have this query string so that we can test any BTO listing with it.
+Jason Li: So in the future your team probably will place this query string with optimize the feature flat or deployment property.
+Joel Juarez: or the…
+Joel Juarez: what Dimmitri just mentioned in the last meeting that maybe it will be a list of listing IDs that you want to enable the checkout and then the rest will go to the classic contact form.  So that will be like the iteration on this right now it's a basic ry ter URL parameter check then as I said this is single play application that it's contained in this repo but this is just a react component used as a package for mobility we
+Joel Juarez: are using this repository vehicle configurator grapper web app. So this is the one that it's actually release and it's handling any request that it's coming to wobbility configurator and all the rest of the path.  So any requests any requests going to configurator path it will reach the vehicle configurator grapper web app and as it has nodejs dependency this package. So basically yeah it's just the grapper. Yes.
+Joel Juarez: Let me hide.
+Mihail Peter: And does it use the MD UI internally?
+Joel Juarez: I'm not pretty sure if it's using MD UI. We can have a quick look. Maybe. Yeah.
+Mihail Peter: Maybe it's not so important. I thought maybe let's continue and…
+Joel Juarez: Okay.
+Mihail Peter: because it's on the MD UI side.
+Joel Juarez: Yeah. Yeah,…
+Mihail Peter: I was asking myself is it already ready for MD UI or not? But maybe not important
+Joel Juarez: you're yeah, we can check later. but yeah, this is the first part of the configurator. Then we know that we will be redirect to check out our classic form. Is there any questions so far or is it clear? in the URL.
+Kavya Swamy: Yeah Joel you already mentioned but I misheard how are we classifying into the nulling and the mobile checkout page like the string how is that being set in the URL.
+Joel Juarez: Let me show you one example. Maybe it will be better to check it.
+Mihail Peter: Medially.
+Joel Juarez: So yeah, it's manually. yeah as I said this is just a temporary thing just for enable the feature in production…
+Kavya Swamy: Okay.
+Joel Juarez: but it is hide from all users.
+Kavya Swamy: Got it. So it's been set manually.
+Joel Juarez: So if you go here and online configurator for example and go to this page.  So here you will see that you can let me copy paste this thing. I will copy. So I don't have any parameter right now and we can do a quick walk through and then put some extras and here right now as there is no parameter then it will go to the checkout.  So it's redirecting to a different domain and here going to the new listing check out code. But if we at the beginning append this parameter this redirect maybe it's too small to see in the screen but I'm just appending right now.
+Joel Juarez: Then it will go to the mobility classic lead contact from So no there is no decision.
+Kavya Swamy: add the parameter or not. Sure.
+Joel Juarez: It is just for internal testing purposes. So right now the default behavior it's to go to checkout. It means that we haven't real live on production with this feature.
+00:10:00
+Kavya Swamy: Got it. Okay. Thanks.
+Joel Juarez: Yes.  So then if we talk about the checkout it's like a service or a page a site that is host it's on gitlab it was work by the outsourcing or the team in Brazil.  So they own this part and we are not actually working on this at all and this part that is gitlab as well as the back end that is in the elixir application. So all this thing we don't own or is not part of mobility. So I will say this is not relevant because we are not working on changes here.
+Joel Juarez: But what we can check here is that whenever we redirect the user here we will have a classic form plus the configuration.  So what we are redirect when we are redirecting from the last step of the configurator to the classic form we are appending a configuration ID and basically this configuration ID is something that this last page it's storing all the details of the configuration in an API it creates an entry in the database on this API  and then it retrieves a config ID and this ID is the one that we are adding in the redirection here.
+Joel Juarez: So basically this is the listing contact form the normal one that we have in mobile the classic and when we send the contact form to M portal we are appending this config ID and this config ID end portal is just a proxy or a gateway in the middle and then the real work it's done in the leasing lead service here basically if we  have a conf config ID in the request. We will retrieve this configuration details from I'm pretty sure that it's a beta vehicle configurator service. I cannot be 100% sure because we didn't work at all on this. We just consume the only thing that we know is that it's behind this URL.
+Joel Juarez: So this is for production configurator proxy newlisting.com and this is for staging configurator proxy new listing junoft io. So this is the API that we are consuming basically we use this URL consume this API but I'm pretty sure that this is the beta vehicle configurator service that it's behind this domain URL.  I would say it's not that critical because I don't think we will do changes there. but you could dig more on where we are handling this configurator.  The only thing that we know is that we have this config ID and I can show you quickly because in the example that I just show you.
+Joel Juarez: So we are already in the classic form plus the configuration ID and this is proxy newlisting.com checkout configuration and I can append the ID here and this is the API.  So basically this is containing all the data that we need the extras the selected color the delivery option the interior that we select the rim extra services that we select. So all the information is there. even we can get the image here. So it will be the exact image of the color of the car that we select.
+Joel Juarez: and this is coming from this API. So basically the listing lead service is taking this information and it is sending to elixir back end. This is an integration that was already there. We just extend with more data.  this elixir back in graphql it's another service that you can check all the links that I'm showing here they are already in the myboard as useful links so don't worry about it you will have the links so here you can find the schema of the graphql so basically at the beginning all the queries and we have mutations so mutations are like
+00:15:00
+Joel Juarez: the actions that we want to perform on the API and one of the mutation that we are using is in the leasing lead service we are using two mutations. One it's called contact dealer and the other one is create external lead. This one when we are on mobile site it's used to all the mirror ads from new listing.  So to the listings that actually belong to new listing and we mirror on mobility they could be basic or with this new feature BTO. So basically we are creating this mutation and there is one difference between the listings that we create for or the leads that we create from a mobility listing for example. Here we have an example.
+Joel Juarez: This is just a mobility listing. it's not related to new listing and this is the normal classic form. The only difference that we don't have any configuration here.  It is going to a portal API again to the listing lead service but it is create external lead mutation and the difference is that in the listing lead service when it's a mobility listing we are sending the confirmation email and the dealer email through comma web service and this is where you already work on some changes to
+Joel Juarez: the XML because we are going through this part for mobility listings. So here we send the lead to come web service take all the information generate the XML build the email with the template and then send the email to the dealer and the confirmation to the buyer.  So this is the difference with the other mutation because for the new listing mirror ads we are not sending any email all the communication is handled by the elixir back end here. So it's for mutation contact dealer the emails are sent somewhere here. Yeah I will make it a bit bigger.
+Joel Juarez: So this is a black box that we don't know and we don't own and we don't work on. but just to be clear because if you need to change something in the email for example in the confirmation email you have to to know that there are difference between mirror listings and the mobile listings. So we are owning these templates for mobile listings but not the ones for the new listing listings.  you will need to ask for some support from Gabrielle or the team in Brazil to make these changes in the templates.
+Joel Juarez: And then the final step is that everything is going to Salesforce and Salesforce Salesforce is I would say the source of truth because then the agents will take all the open cases from Salesforce but as well the dealer admin page or admin site for the leasing part they are.  So this application is taking all the leads from this Salesforce database. So at the end it should be there and what I mean with dealer admin page is So basically this is a site where you can check all the classic leads for example.
+Joel Juarez: yeah, you can go to the details and you will check here what you send. I think we can do but this is staging. I don't think we will be able to send any staging lead right now because we don't have any BTO listing working.  But you can check here the details of the leads that you are sending. So yeah, this is the I would say first part related to mobility. Is there any question? Yes, Marcus.
+Marcus Mansson: I have one but I don't so the web app is not using MD UI right so that would be which parts in this overview and the reason why I'm asking I think you suspect it because of the rebranding as well that will come and
+00:20:00
+Joel Juarez: we are rebranding ready So this part for sure it's working but this one I'm not sure if it's already using MD UI Jason
+Marcus Mansson: Mhm. You're mute.
+Jason Li: basically bump and…
+Marcus Mansson: Now you're back.
+Jason Li: mute. Okay.
+Marcus Mansson: You were mute or you were on audio. Okay. Thank you.
+Jason Li: So I have checked the vehicle configurator web app already. So it is not using the MD UI. So all the components here who is pointing at and not rebanding automatically. So you need to change the code for the configurator where app. Yeah.
+Marcus Mansson: consumer checkout it So then do you know because I would surface this in a way or do you know if it's already surfaced just because of the rebranding so that we have that written down.  I'm recording this. So please Gemini make a record of this part not being in the MDI and then I will just bring it to Ollie or someone and then we will see how we proceed. Okay.
+Joel Juarez: Yes, me. Yeah,…
+Mihail Peter: For this first part for the vehicle configurator web app what APIs are used here for example for reading all possible details and then saving the configured ad and who is owning those services behind the APIs.
+Joel Juarez: I think the one that I pretty sure it is using it's the same that we are where we are getting the configuration details because this application it's saving the configurator.  So I will put an arrow here because here in the last step this application is saving to this API. for getting all this I think we can check here let me do a quick no this one.
+Joel Juarez: Yes, this one.
+Jason Li: already the options in the configurator is come from the configurator proxy ling.com as well.
+Jason Li: So it's behind this proxy but I don't know what is the exact service behind this proxy.
+Joel Juarez: I think we can do a quick look here because if this is a single page application, most of the things are happening in the client side. let me check configurator. No, sorry.
+Jason Li: Okay, you can filter it with the filter/hrl on the top of the tab. Now you're using al so it's a little bit hard to find. I don't have the pawn to help you to p it out.
+Jason Li: Yeah. …
+Joel Juarez: Yeah I think for example the graphql here we are using to get some rates I think.
+Joel Juarez: Then what you say that I can look for Jason.
+Jason Li: but anyway I have already sent it in the chat. So there's a mong called exterior basically include the exterior information also there's an other end pon for extra item.
+Joel Juarez: Okay.
+Jason Li: So all these options come from the configurator proxy.nleasing.com
+Jason Li: It's now releasing.com.
+Joel Juarez: So, it's the same API.
+Joel Juarez: 
+Mihail Peter: And who is owning the services behind the APIs?
+Joel Juarez: I will put as a note here maybe as well just to have it as reference.
+Jason Li: Yes. API.
+00:25:00
+Joel Juarez: I'm not quite sure to be honest.  So VA this is for sure something coming from move that it's even hosted in a different workspace. I think it's still GCP or if I'm not mistaken or I'm not sure let me check because when we use these beta services we use this classified IO domain coming from GCP.
+Joel Juarez: But I think we can go to here for example better v. Okay. it has no read me. hint for knowing who is owning this. Switch to GitHub actions book baning.
+Joel Juarez: So there is only one person who has commit to this repo in the last months.  So what I will do is to ping this person to know who is actually owning because as I said when we implement this we didn't go into these details because we just consume the APIs and we had all so we got super from Gabriel and Gabriel for sure knows more about all these backend thing and all these APIs but actually we were just getting results so we continue implementing
+Mihail Peter: So okay, you were not owning the service of
+Joel Juarez: So this is something that No,…
+Joel Juarez: no, no, not at all. So this beta vehicles configurator services right now and a black box I would say. Yes. Thanks Jason. You are putting some queries there, right? Yeah.  Extras rims exterior. Is there any other questions or do you think we can move to the new leasing site? Okay.
+Joel Juarez: Then new list inside it's kind of the same architecture just it is changing the artifacts that we are using. So as you already know vehicle configurator web app it's the same because it's just a compact component there that we are including and the second repo that is using this one it's the new leasing web app.  So basically the front facing of the world new listing site so new listing web app is the one serving these pages. So newlisting.com the make angot the id and I think it's the model something like this and then slash configurator.
+Joel Juarez: So this URL is served by new listing app and it is basically reusing the same component in vehicle configurator web app. So it means that the logic that we implement for mobility we did the same in new listing web app the redirection.  So it's working exactly the same and the only difference is that here we are not going to the consumer check out web app because it is not the dynamic checkout anymore but it is the new leasing contact form. So it's the own contact form that it's part of the new listing site.
+Joel Juarez: And here basically it's the same. If we have the flag enabled, we will redirect to this contact appending the config ID. It works exactly the same. you can see here in this example that the config ID is present. Then we will render all the details.  when we send the contact form, it will go through emporter API through listing lead service and it will repeat exactly the same path.
+00:30:00
+Joel Juarez: The only difference is that for the classic listings here as they are always new listing we don't have any mirror mobility listings on new listing site for example as far as I know we don't have any so I would say for new listing site this part doesn't apply because we don't have mobility a listings on this site  Then for new listing it will be always this case it could be BTO that it contains the config ID or a classic but always through this path. It means that the emails will go always through elixir bucket but all the rest of the integration or the interactions are basically the same.
+Joel Juarez: We get the configuration details from this service and we forward to elixir back end and then to Salesforce. Is there any other question here? Yes m I cannot tell you about the new listing emails…
+Mihail Peter: Regarding emails, do they look exactly the same? those from Comma Web Service and Elixir Why I'm asking …
+Joel Juarez: because I haven't got anyone. What first reason is that I haven't tried this on production. I mean I haven't sent any contact form in production and on the staging the elite the back end it's sending just let me try to find So in terms of design,…
+Mihail Peter: if we need to do changes to the email, do we need to consider both use cases?
+Mihail Peter: because the emails are the same and we want to cover all places or are they completely different and so if we need to change something we are only touching comma web  service.
+Joel Juarez: I'm not  But I think they are different because it very related new listing and the other ones are mobility with the expertise of new listing. So I'm not pretty sure because I haven't seen the new listing email. I just wanted to show you that for staging when you send a lead the back end is sending just this test email with all the content that you are sending.  It's just to verify that you are sending properly the data but they don't send actually the email and staging and I haven't tried on production so I cannot tell you but what we can see is the one that we are sending from mobile listening. Yeah, this is the one coming from moil.
+Joel Juarez: So yeah, if you want to change something in the content, for example, you want to add additional information, yes, you will need to take care about two different templates or two different emails actually because even for the ones on new listing side, maybe you will not need to do the changes, but just ask support from the team in Brazil.
+Mihail Peter: It's a bit difficult…
+Mihail Peter: because we didn't see emails from them. for example, the recent case where we need to adjust this XML source in the footer. so for me it's clear it's a comma web service but maybe there is the same field also in the noing emails and I don't know how we should handle it.
+Joel Juarez: I'm not  Sure. I think this XML thing doesn't exist at all in the new listing. That's my impression because this XML integration is more related to mobility clients and when we send a new listing email, it is related to new listing clients.  So they are not actually the same let's say because as I mentioned the new listing listings are mirror from new listing into mobility. So they are not actually mobility clients. They are like new listing clients. So I'm pretty sure but I'm not 100% confident but I'm pretty sure that this XML thing doesn't exist.  So it could be a different email template and different thing but the content for sure you will need to ask for support to make the changes.
+00:35:00
+Joel Juarez: yeah, unless you want to deep dive into Elixir code and try to make changes, but yeah, I don't think anyone wants to do it in mobility at least. But yeah, that will be the answer to this.  So then this is the second part that is new listening and the last thing that I want to show you is that I put some useful links.
+Joel Juarez: These five links are the PRs that we did for the changes that I just mentioned the redirection to handle the config ID in listing lead service for example to call the configuration from the API and send it to the back end through the GraphQL. So basically here are all the PRs.  they could be a good starting point just to understand where we had to make the changes and what changes we did. so it's I think easier to understand what you will need in the future for the oncoming requests or requirements and then as I said the URLs are already here.
+Joel Juarez: So this is the GraphQL URL for staging. This is the configurator for staging as this is The only difference with the staging in the new listening world is that you replace for Junooft IO. So basically Junoft IO is a staging or test environment and com it's production.
+Joel Juarez: and then the two links that I mentioned the admin to the new listing leads and as I said all these application it's taking the leads from Salesforce so there are some APIs in the listing lead services in the middle to actually provide the list of leads but they are actually coming from GraphQL and I'm pretty sure GraphQL that is elixir back end
+Joel Juarez: it's taking from Salesforce but yeah this is the two tools that you can use in staging for testing your changes or actually it's for checking that everything is working as expected because here you have Salesforce and you have the dealer admin site for both of these you can ask Gabrielle for credentials in this case because it's a username and password  and as well for access to sandbox because it's like an invitation. So in Salesforce invites with your email, you get an email and then sign up or register for access to the sandbox. But I think that those are very helpful because you will be able to test end to end the changes that you want to perform and check that everything is working as expected.
+Joel Juarez: So yeah that would be all from the overview. Maybe it will be useful if we can have a quick walk through in the PRs just to check if there is any question. Maybe Jason, you can share the ones from front end you work on this.
+Joel Juarez: So yeah.
+Jason Li: Yes, sure.
+Jason Li: Maybe I can't share my screen.
+Joel Juarez: Yeah, I think it's better. So you can navigate
+Jason Li: check one by one. First one is about the vehicle configurator wrapper. It's about the BTO immobility and redirect user to using contact form.
+00:40:00
+Jason Li: So basically the change is not that much. So we have some configuration of specific URL here. Basically it's about the le contact form in the mobility sign.
+Joel Juarez: It's just the base URL for building the redirection.
+Jason Li: And then there's some The magic key string is here. So we check if the redirect to leing contact form Q string exists and the value is true and then we should redirect user to the new content form. So basically here I will check if this is true.
+Jason Li: If it is true and then we will generate a URL to redirect u which is redirects user to the leing contact form otherwise we will use the existing original URL.  Then in this function I just construct the URL and also append the config ID So that in the listing content form I can grab all the configuration information through this ID and then display the correct image and also the rate in the right side vehicle info box.
+Jason Li: Any question? If no, I will continue to the consumer check which is the le contact from mobility.
+Marcus Mansson: No one the first one was the configurator the one the top one and…
+Joel Juarez: Yes.
+Marcus Mansson: this is the one that you own in GLaDOS right this part.
+Jason Li: Yes, exactly.
+Marcus Mansson: Okay. Yeah.
+Jason Li: So you can see the screenshots here already. So basically in the listing contact form if we receive the configuration ID we will use this ID to fetch the configuration of this BTO lead and then we will display the corresponding image rate and also the period of time basically those information graph from the configuration ID.
+Jason Li: So let's have a look in the code. I will explain this a little bit later and also I will collapse all the  past.
+Marcus Mansson: How much do you think we would be? so if we would make changes, we you would need to comply with that so it would be something we would probably do as a pull request towards your repository if we would make changes in this one. Right. This is nothing you're going to hand over. This is GLO. So what I want to make sure this is GLO owned. You are owning this still. It's not Mhm. Mhm.
+Joel Juarez: let's say and as owners I think it will be defined ways of working in the near future. So maybe we can talk about this later but the idea scenario is that you provoke changes on the contact form then your developers will check most of the part that is working that everything is working properly and…
+Marcus Mansson: Okay. Yeah.
+Joel Juarez: we will have a quick look just to be sure that we are aware what's happening with our repository let's say and yeah it's more like communication I would say Yeah. Mhm.
+Jason Li: Okay, let's back into the code. first of all, the consumer checkout web app is a NexS application. So everything is start with the page.ts tsx. So this is the page component of the leing contact form.  So we will check if this is a configuration BTO leing. So we will check if this ID exists and then we will add those information inside the vehicle. So we have this transform vehicle listing.
+Jason Li: So in this function a second this one Maybe the more important is about this patch configuration data. Basically we fetch the configuration  refresh the configuration so we know the detail of this list BTO lead and then we will replace the original data in the vehicle.
+00:45:00
+Jason Li: So basically we use the iguration. basically we dis destruct the configuration data and replace the leasing rates, customer type and any mileage also turn off contract and image URL here.  So basically I fetch data and replace the original vehicle data with this configurated data so that I don't need to modify the code everywhere. So at the beginning I already change the content of the vehicle and then everything will automatically display correctly.
+Jason Li: So here's the magic and then I think at the end the rest of the code is about sending out the configuration ID to the list server. So you can see I add the config configuration ID everywhere. Yeah. It is from the low leasing prosy.
+Kavya Swamy: So, the fetch configuration uses which Is it coming from the M portal or is it the GraphQL you're fetching the data from?
+Joel Juarez: It's coming.
+Jason Li: So maybe we can have a quick look how does it look like. So basically it is from the ling configurator service.
+Jason Li: So this is the URL.
+Kavya Swamy: Mhm. Okay.
+Joel Juarez: Maybe you can go to myro and…
+Joel Juarez: show in the diagram it's basically the same service that we are using in listing this service. So it's this beta vehicle configurator service.
+Kavya Swamy: Got it. Thanks.
+Jason Li: Great. And…
+Jason Li: then basically in this PL I fetch the configuration data from the configurator API and replace the original listing information with the configurator data.
+Jason Li: So we can display the correct rate and then also I send the configur configuration ID to the list servers. This is what I does in the pro. So I don't go into the detail because you can see quite a lot of change but you can check the detail later.
+Joel Juarez: JSON will open the PR now and for new listing it's only P one PR because the configurator and the contact for they belong to the same web app that is new listing web app so it's only PR for both changes
+Jason Li: study the configurator is in the loud leware app also the contact phone is also in low le app so that's why there is only one PR for the low leasing integration and Let me think where to start. So basically I did similar things as previous PR. So I check if this query string exist. and then we will call this function to generate a URL for the lowlying contact form otherwise we will fall back to the existing logic.
+Jason Li: So in the future I think maybe you will replace this piece of logic with checking maybe specific listing ID or optimizing feature flat or other stuff.  But currently we are using query string as a feature flat for testing purpose and then let me check this is the contact form of the lousy.com.
+00:50:00
+Jason Li: So I can see yeah in this part I add the configuration ID in the submit contact function. So that I will use this config I will send this configuration ID to the list service and the last part is about how I display the information in the contact form.
+Jason Li: The code actually is not that much but basically you can see all the changes about adding a new parameter to check if we enable this features and then if it is enabled we will generate a URL and redirect user to the contact form and also add the query string at the end and then in the contact form I will check if this configur configuration exist this conf configuration ID exists in the URL L if yes and then I will fetch the configuration with this ID and use this piece of information replace the image rate and…
+Jason Li: also some other related information and at the end of the flow I will send this configuration ID to the list service.
+Jason Li: Yeah. Yeah. That is all about the front end parts.
+Joel Juarez: Thank you.
+Joel Juarez: And then I will share again just to share in the last minutes the backend pull requests. So I hope we have enough time. I will try to summarize this. share a picture and then I will go to the end portal first because you remember that end portal it's always in the middle as a proxy there. So what we need to do in M portal it's basically take the config ID parameter and forward to listen this service. There is no other thing to do here.
+Joel Juarez: So adding to the listing request adding to the contact form request that we are receiving here and then forward in this service where is it here.  So basically this is the service where we are taking the incoming request. It's this one listening contact form parameters. It's the incoming request to import and then creating a listing contact form request containing the configuration ID parameter. So it's import just a forward of this data this configuration ID.
+Joel Juarez: Everything is optional because as I mentioned we are handling classic leads that doesn't contain any config ID and BTO leads sorry yeah BTO listings and then if we go to the listing lead service that is the one with more changes I would try to summarize here.  So the most important changes here are that we add in this new listing gateway is the one that is performing the request to the graphql. So you recall that I mentioned that for mirror listings we are calling one mutation and for mobility listings we are calling a different mutation.
+Joel Juarez: So the changes that I introduced was only for the mirror listings because they are the BTO listings. And here you can see that I just introduced a piece of code that it's building the new parameters that we need to send to the GraphQL.  It's this part and then this one it will be added in the build building of the new listing contact from request. So here you will see that this parameter it's here. So I add it and then just put it in the object. So basically in that way we will just send all these details.
+00:55:00
+Joel Juarez: The only thing is that in the graphql you can see that this contact dealer params has an parameter or a field that is called checkout configuration and this has a particular structure. So it's not only the ID that we have to share we have to build construct this object.  So that's why it took more changes here. Sorry where is I think I lost no here.
+Joel Juarez: That's why you will see that in this PR no sorry I'm already hey so in this PR we create this builders I cannot do it bigger so this is the param builders this is the main class that we're using to actually build the  object that we will send to GraphQL. Here we are fulfilling the parameters that we are expecting and how we are doing. So the first thing is that we are here in this first changes.
+Joel Juarez: No. new listing gateway. Here you will see that I first get configuration ID. Yes. So here we have the connection with the API. So this checkout configurator gateway is the one that we are using to communicate with the API. this one it's very straightforward. It's a rest endpoint that we use with the configuration ID and then we retrieve all the configuration the one that I show you here. So we will get this information and based on this we build the parameters that we will send to GraphQL that are here.
+Joel Juarez: It's kind of tricky because yeah there was a specific way to do it that I got instructions from Gabriel but yeah you can check the code of how it is built. It's basically taking some parameters that is called in some way in one side and then transform to another body. But yeah m No,…
+Mihail Peter: Am I right that you will be still owning the leasing lead service?
+Joel Juarez: actually listening lead service is owned by team rocket.
+Mihail Peter: Team rocket. Okay. Okay.
+Joel Juarez: So we are not owning this.
+Mihail Peter: Okay.
+Joel Juarez: As I said we did the same. We propose changes, we create a PR, they review and they approve and then we merge. Mhm.
+Mihail Peter: Thank you. And the second question is u instead of having this manual switch with the URL parameter we probably will need very soonish the feature demi requested a list of listings which should still be forwarded to the old flow.
+Mihail Peter: would it make sense already to think about where to put it already incorporate it into the PRs because right now on two places we have this logic for switching or for building old new URL and at this place we would already put the new I don't know maybe static list I don't know how we want to handle it and we
+Mihail Peter: could already prepare for the real production change.
+Joel Juarez: But you mean in these PRs and…
+Mihail Peter: Yeah. …
+Joel Juarez: they are already merged. So yeah all these things are already merged.
+Mihail Peter: okay. Okay. Mhm. Yeah.
+Joel Juarez: So all the code it's live in production but as we said it is behind this kind of feature flag that's why the status quo it's still the check out on…
+01:00:00
+Joel Juarez: but yeah everything is already merged.
+Mihail Peter: Okay, then we will need to figure out…
+Mihail Peter: how to the exception list.
+Joel Juarez: Yeah, you will need to change it in the webop wrapper in this grapper and the new listing web app because they are the two places where you need to change.
+Mihail Peter: All right.
+Joel Juarez: Yeah. Mhm.
+Mihail Peter: And then the last question in the noing web app we do have this owners file and we have one line this one pointing to the team Tesla for the source app configurator.
+Mihail Peter: I send it to the chat. then is it this configurator in the null leing or is it something else?
+Joel Juarez: Mhm. Yes.
+Joel Juarez: This source app configurator. Yes, this is the one that we are talking about.
+Mihail Peter: So should we…
+Joel Juarez: So right now they are the owners. I think so.
+Mihail Peter: then exchange or remove this line and now we are the owners of it or how is it supposed to be?
+Joel Juarez: I think this is something to ask to Dimmitri. So because I'm not sure what's the scope of your team. So it would be fully new listing ownership. In that case it doesn't make sense to have more like the team ownership by different parts because you will own the full new listing web app for example. but I think this is something that Demetri can answer. So if you will take cover of the configurator as well or…
+Joel Juarez: maybe you will use configurator as a blackbox that you will just consume something from there.
+Mihail Peter: Okay.
+Mihail Peter: I thought the configurator is exactly the part we are taking over now.
+Joel Juarez: Okay, then yeah, it makes sense to change the team name there for this…
+Mihail Peter: Okay, but I will talk to Jima.
+Joel Juarez: because Okay,…
+Mihail Peter: Thank you. That's all from my side.
+Joel Juarez: then is there any other question?
+Joel Juarez: We're already five minutes. Yeah.
+Kavya Swamy: I don't have a question…
+Kavya Swamy: but thank you for walking us through. it was really helpful in understanding the overall structure. So we were all very blank before and I think now we have some idea.
+Joel Juarez: Yeah, that's my pleasure. So as we said you will start working on this the same way that we start doing so really blind.
+Mihail Peter: Thank you guys.  Five.
+Joel Juarez: So we are here to try to help as most as much as we can and don't hesitate on pinging us for any question.  We are not sure that we can answer but at least we will try. Okay. Thank you. Bye.
+Jason Li: Bye-bye.
+Meeting ended after 01:03:12 👋
+This editable transcript was computer generated and might contain errors. People can also change the text after it was created.
